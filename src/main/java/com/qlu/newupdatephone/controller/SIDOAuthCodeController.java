@@ -1,5 +1,6 @@
 package com.qlu.newupdatephone.controller;
 import com.alibaba.fastjson.JSONObject;
+import com.qlu.newupdatephone.entity.SIDUser;
 import com.qlu.newupdatephone.utils.HttpClientUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -104,6 +105,15 @@ public class SIDOAuthCodeController {
         String s = HttpClientUtils.getInstance().doPost(url, null, params);
         JSONObject jsonObject = JSONObject.parseObject(s);
         System.out.println(s);
+        // 创建UserInfo对象并保存用户信息
+        SIDUser siduser = new SIDUser();
+        siduser.setXM(jsonObject.getString("XM"));
+        siduser.setGH(jsonObject.getString("GH"));
+
+
+        // 将userInfo保存到session中或其他地方，以便在其他类中使用
+        HttpSession session = request.getSession();
+        session.setAttribute("userInfo", siduser);
     }
 
 
