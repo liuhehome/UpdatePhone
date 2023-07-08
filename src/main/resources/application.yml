@@ -1,0 +1,6 @@
+server:
+  port: 8123
+
+cas-server:
+  refreshToken:
+
