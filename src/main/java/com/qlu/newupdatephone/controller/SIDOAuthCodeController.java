@@ -1,6 +1,7 @@
 package com.qlu.newupdatephone.controller;
 import com.alibaba.fastjson.JSONObject;
-import com.qlu.newupdatephone.entity.SIDUser;
+import com.qlu.newupdatephone.entity.SidUser;
+import com.qlu.newupdatephone.test.OtherClass;
 import com.qlu.newupdatephone.utils.HttpClientUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -12,13 +13,13 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+
 @RestController
 public class SIDOAuthCodeController {
 
     //保存刷新令牌
     @Value("${cas-server.refreshToken}")
     private String refreshToken = null;
-
     public String access_token = null;
 
     @GetMapping("/loginByCode")
@@ -32,7 +33,6 @@ public class SIDOAuthCodeController {
         //回调地址，登录成功后会将code传递给该地址
         String redirect_uri = "https://web3.qlu.edu.cn:3000";
 
-
         StringBuilder url = new StringBuilder();
 
         url.append(serverUrl).append("/oauth2.0/authorize");
@@ -44,9 +44,7 @@ public class SIDOAuthCodeController {
         System.out.println(url);
 
         response.sendRedirect(String.valueOf(url));
-
     }
-
 
     private String getEncodeUrl(String url) throws UnsupportedEncodingException {
         return URLEncoder.encode(url, StandardCharsets.UTF_8.toString());
@@ -98,25 +96,32 @@ public class SIDOAuthCodeController {
 
     @RequestMapping("/usermsg")
     public void receive(HttpServletRequest request, HttpServletResponse response) {
+
         //使用access_token获取用户信息
         String url = "https://sso.qlu.edu.cn/oauth2.0/profile";
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("access_token",access_token);
         String s = HttpClientUtils.getInstance().doPost(url, null, params);
         JSONObject jsonObject = JSONObject.parseObject(s);
-        System.out.println(s);
-        // 创建UserInfo对象并保存用户信息
-        SIDUser siduser = new SIDUser();
-        siduser.setXM(jsonObject.getString("XM"));
-        siduser.setGH(jsonObject.getString("GH"));
 
+        System.out.println(s);
+        System.out.println(jsonObject);
+
+        // 创建sidUser对象并保存用户信息
+        SidUser sidUser = new SidUser();
+
+        sidUser.setXM(jsonObject.getJSONObject("attributes").getString("XM"));
+        sidUser.setXH(jsonObject.getJSONObject("attributes").getString("XH"));
+        sidUser.setTEL(jsonObject.getJSONObject("attributes").getString("TEL"));
 
         // 将userInfo保存到session中或其他地方，以便在其他类中使用
         HttpSession session = request.getSession();
-        session.setAttribute("userInfo", siduser);
+        session.setAttribute("SidUser", sidUser);
+
+        System.out.println(sidUser.getXM());
+        System.out.println(sidUser.getXH());
+        System.out.println(sidUser.getTEL());
+        System.out.println("=============================");
+
     }
-
-
-
-
 }
